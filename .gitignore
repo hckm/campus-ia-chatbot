@@ -29,6 +29,9 @@ target/
 # Environment
 .env
 
-# IDE
+# IntelliJ IDEA
 *.iml
-.idea/workspace.xml
+.idea/
+
+# Visual Studio Code
+.vscode/
