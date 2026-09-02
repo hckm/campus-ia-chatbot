@@ -1,0 +1,18 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://localhost:27017/campus-ia}
+
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  model: ${GEMINI_MODEL:gemini-2.5-flash}
+  base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
+  timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:30}
+
+estabelecimento:
+  site: https://www.renovomanipulacao.com.br/
+
+logging:
+  level:
+    br.edu.usc.campusiachatbot: INFO
+    org.hibernate.SQL: WARN

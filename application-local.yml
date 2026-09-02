@@ -1,0 +1,13 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://localhost:27017/campus-ia}
+
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:5}
+
+estabelecimento:
+  cidades-atendidas: ${ESTABELECIMENTO_CIDADES_ATENDIDAS:}
+  uf: ${ESTABELECIMENTO_UF:}
+  site: ${ESTABELECIMENTO_SITE:https://www.renovomanipulacao.com.br/}

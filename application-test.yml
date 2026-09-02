@@ -1,0 +1,28 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://localhost:27017/campus-ia}
+
+gemini:
+  api-key:
+  model: gemini-2.5-flash
+  base-url: https://generativelanguage.googleapis.com
+  timeout-seconds: 5
+
+estabelecimento:
+  nome: Farmacia Teste
+  tipo: farmacia de manipulacao
+  horario-funcionamento: Segunda a sexta das 08:00 as 18:00
+  endereco: Rua Teste, 123
+  formas-pagamento: Pix, cartao de credito e cartao de debito
+  entrega: Entregamos apenas nas cidades atendidas configuradas.
+  cidades-atendidas:
+    - Iacanga
+  uf: SP
+  telefone: (14) 99999-9999
+  site: https://www.renovomanipulacao.com.br/
+
+cep-lookup:
+  enabled: true
+  base-url: https://viacep.com.br
+  timeout-seconds: 5

@@ -1,0 +1,75 @@
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+spring:
+  application:
+    name: campus-ia-chatbot
+  profiles:
+    default: local
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://localhost:27017/campus-ia}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+  jackson:
+    default-property-inclusion: non_null
+
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-2.5-flash}
+  base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
+  timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:30}
+
+estabelecimento:
+  nome: ${ESTABELECIMENTO_NOME:}
+  tipo: ${ESTABELECIMENTO_TIPO:farmacia de manipulacao}
+  horario-funcionamento: ${ESTABELECIMENTO_HORARIO_FUNCIONAMENTO:}
+  endereco: ${ESTABELECIMENTO_ENDERECO:}
+  formas-pagamento: ${ESTABELECIMENTO_FORMAS_PAGAMENTO:}
+  entrega: ${ESTABELECIMENTO_ENTREGA:Entregamos apenas nas cidades atendidas configuradas.}
+  cidades-atendidas: ${ESTABELECIMENTO_CIDADES_ATENDIDAS:}
+  uf: ${ESTABELECIMENTO_UF:}
+  telefone: ${ESTABELECIMENTO_TELEFONE:}
+  site: ${ESTABELECIMENTO_SITE:https://www.renovomanipulacao.com.br/}
+
+cep-lookup:
+  enabled: ${CEP_LOOKUP_ENABLED:true}
+  base-url: ${CEP_LOOKUP_BASE_URL:https://viacep.com.br}
+  timeout-seconds: ${CEP_LOOKUP_TIMEOUT_SECONDS:5}
+
+chatbot:
+  mensagens:
+    horario-informado: "${CHATBOT_MSG_HORARIO_INFORMADO:O horario de funcionamento de {nome} e: {horario}.}"
+    horario-nao-configurado: "${CHATBOT_MSG_HORARIO_NAO_CONFIGURADO:Ainda nao tenho o horario de funcionamento configurado. Vou encaminhar para a equipe confirmar essa informacao.}"
+    pagamento-informado: "${CHATBOT_MSG_PAGAMENTO_INFORMADO:As formas de pagamento aceitas por {nome} sao: {formasPagamento}.}"
+    pagamento-nao-configurado: "${CHATBOT_MSG_PAGAMENTO_NAO_CONFIGURADO:Ainda nao tenho as formas de pagamento configuradas. Vou encaminhar para a equipe confirmar essa informacao.}"
+    endereco-informado: "${CHATBOT_MSG_ENDERECO_INFORMADO:O endereco de {nome} e: {endereco}.}"
+    endereco-nao-configurado: "${CHATBOT_MSG_ENDERECO_NAO_CONFIGURADO:Ainda nao tenho o endereco configurado. Vou encaminhar para a equipe confirmar essa informacao.}"
+    entrega-generica: "${CHATBOT_MSG_ENTREGA_GENERICA:Fazemos verificacao de entrega por regiao. Informe seu CEP para consultarmos a disponibilidade.}"
+    entrega-cidade-atendida: "${CHATBOT_MSG_ENTREGA_CIDADE_ATENDIDA:Entregamos em toda a cidade de {cidade}.}"
+    entrega-fora-area: "${CHATBOT_MSG_ENTREGA_FORA_AREA:No momento, fazemos entrega apenas em: {cidades}.}"
+    entrega-solicitar-cidade: "${CHATBOT_MSG_ENTREGA_SOLICITAR_CIDADE:Fazemos entrega nas seguintes cidades: {cidades}. Informe a cidade do endereco para confirmarmos.}"
+    entrega-cep-nao-validado: "${CHATBOT_MSG_ENTREGA_CEP_NAO_VALIDADO:Nao consegui validar esse CEP no momento. Informe a cidade do endereco para confirmarmos a entrega.}"
+  sessao:
+    janela-inatividade-minutos: ${CHATBOT_SESSAO_JANELA_INATIVIDADE_MINUTOS:30}
+    max-historico-mensagens: ${CHATBOT_SESSAO_MAX_HISTORICO_MENSAGENS:10}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    br.edu.usc.campusiachatbot: INFO
