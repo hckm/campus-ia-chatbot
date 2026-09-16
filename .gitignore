@@ -35,3 +35,4 @@ target/
 
 # Visual Studio Code
 .vscode/
+.local/

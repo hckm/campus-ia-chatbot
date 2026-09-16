@@ -49,7 +49,7 @@ class WhatsAppWebhookControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.idAtendimento").isNumber())
+                .andExpect(jsonPath("$.idAtendimento").isString())
                 .andExpect(jsonPath("$.tipoSolicitacao").value("HORARIO_FUNCIONAMENTO"))
                 .andExpect(jsonPath("$.status").value("PROCESSADO"));
     }

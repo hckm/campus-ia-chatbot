@@ -2,6 +2,7 @@ package br.edu.usc.campusiachatbot.client;
 
 import br.edu.usc.campusiachatbot.config.GeminiProperties;
 import br.edu.usc.campusiachatbot.exception.GeminiIntegrationException;
+import br.edu.usc.campusiachatbot.service.InterpretacaoIaSchema;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -63,53 +64,7 @@ public class GeminiClient {
                 "generationConfig", Map.of(
                         "temperature", 0.2,
                         "responseMimeType", "application/json",
-                        "responseJsonSchema", buildResponseSchema()
-                )
-        );
-    }
-
-    private Map<String, Object> buildResponseSchema() {
-        return Map.of(
-                "type", "object",
-                "properties", Map.of(
-                        "tipoSolicitacao", Map.of(
-                                "type", "string",
-                                "enum", List.of(
-                                        "ORCAMENTO_FORMULA",
-                                        "COMPRA_PRODUTO",
-                                        "STATUS_PEDIDO",
-                                        "ENVIO_RECEITA",
-                                        "RECOMPRA",
-                                        "HORARIO_FUNCIONAMENTO",
-                                        "ENTREGA",
-                                        "FORMAS_PAGAMENTO",
-                                        "DUVIDA_ADMINISTRATIVA",
-                                        "DUVIDA_FARMACEUTICA",
-                                        "RECLAMACAO",
-                                        "OUTROS"
-                                )
-                        ),
-                        "categoria", Map.of(
-                                "type", "string",
-                                "enum", List.of(
-                                        "ATENDIMENTO_COMERCIAL",
-                                        "ATENDIMENTO_ADMINISTRATIVO",
-                                        "ATENDIMENTO_FARMACEUTICO",
-                                        "RECLAMACAO",
-                                        "OUTROS"
-                                )
-                        ),
-                        "respostaGerada", Map.of("type", "string"),
-                        "necessitaAtendimentoHumano", Map.of("type", "boolean"),
-                        "motivoEncaminhamento", Map.of("type", List.of("string", "null")),
-                        "confianca", Map.of("type", "number")
-                ),
-                "required", List.of(
-                        "tipoSolicitacao",
-                        "categoria",
-                        "respostaGerada",
-                        "necessitaAtendimentoHumano",
-                        "confianca"
+                        "responseJsonSchema", InterpretacaoIaSchema.criar()
                 )
         );
     }

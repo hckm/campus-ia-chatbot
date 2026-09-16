@@ -5,7 +5,7 @@ import br.edu.usc.campusiachatbot.enums.TipoSolicitacaoEnum;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record GeminiStructuredResponseDTO(
+public record InterpretacaoIaResponseDTO(
         TipoSolicitacaoEnum tipoSolicitacao,
         CategoriaAtendimentoEnum categoria,
         String respostaGerada,
@@ -13,8 +13,8 @@ public record GeminiStructuredResponseDTO(
         String motivoEncaminhamento,
         Double confianca
 ) {
-    public GeminiStructuredResponseDTO normalizado() {
-        return new GeminiStructuredResponseDTO(
+    public InterpretacaoIaResponseDTO normalizado() {
+        return new InterpretacaoIaResponseDTO(
                 tipoSolicitacao == null ? TipoSolicitacaoEnum.OUTROS : tipoSolicitacao,
                 categoria == null ? CategoriaAtendimentoEnum.OUTROS : categoria,
                 respostaGerada == null || respostaGerada.isBlank()

@@ -26,13 +26,14 @@ class EnderecoEnrichmentServiceTest {
             "Rua Teste, 123",
             "Pix",
             null,
+            null,
             List.of("Iacanga", "Itaju"),
             "SP",
             "(14) 99999-9999",
             null
     );
 
-    private final EnderecoEnrichmentService service = new EnderecoEnrichmentService(cepLookupClient, properties);
+    private final EnderecoEnrichmentService service = new EnderecoEnrichmentService(cepLookupClient, () -> properties);
 
     @Test
     void deveRetornarVazioQuandoMensagemNaoTemCepNemEndereco() {

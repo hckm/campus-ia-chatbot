@@ -8,7 +8,7 @@ import br.edu.usc.campusiachatbot.enums.TipoSolicitacaoEnum;
 import java.time.LocalDateTime;
 
 public record ChatbotResponseDTO(
-        Long idAtendimento,
+        String idAtendimento,
         OrigemMensagemEnum origem,
         String mensagemCliente,
         TipoSolicitacaoEnum tipoSolicitacao,

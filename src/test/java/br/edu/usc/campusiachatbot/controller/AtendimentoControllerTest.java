@@ -55,8 +55,9 @@ class AtendimentoControllerTest {
 
         mockMvc.perform(get("/api/atendimentos"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.itens").isArray())
+                .andExpect(jsonPath("$.itens.length()").value(2))
+                .andExpect(jsonPath("$.proximoToken").doesNotExist());
     }
 
     @Test
@@ -81,8 +82,9 @@ class AtendimentoControllerTest {
 
         mockMvc.perform(get("/api/atendimentos/status/PROCESSADO"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.itens").isArray())
+                .andExpect(jsonPath("$.itens.length()").value(1))
+                .andExpect(jsonPath("$.proximoToken").doesNotExist());
     }
 
     @Test

@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface MensagemAtendimentoRepository extends JpaRepository<MensagemAtendimentoEntity, Long> {
 
-    @Query("SELECT m FROM MensagemAtendimentoEntity m WHERE m.atendimento.id = :atendimentoId ORDER BY m.dataMensagem DESC")
+    @Query("SELECT m FROM MensagemAtendimentoEntity m WHERE m.atendimento.id = :atendimentoId "
+            + "ORDER BY m.dataMensagem DESC, m.id DESC")
     List<MensagemAtendimentoEntity> findUltimasMensagens(@Param("atendimentoId") Long atendimentoId, Pageable pageable);
 }

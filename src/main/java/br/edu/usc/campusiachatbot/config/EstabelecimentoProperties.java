@@ -12,6 +12,7 @@ public record EstabelecimentoProperties(
         String horarioFuncionamento,
         String endereco,
         String formasPagamento,
+        String condicoesParcelamento,
         String entrega,
         List<String> cidadesAtendidas,
         String uf,
@@ -32,6 +33,10 @@ public record EstabelecimentoProperties(
 
     public boolean hasFormasPagamento() {
         return temTexto(formasPagamento);
+    }
+
+    public boolean hasCondicoesParcelamento() {
+        return temTexto(condicoesParcelamento);
     }
 
     public boolean hasEndereco() {
@@ -72,6 +77,10 @@ public record EstabelecimentoProperties(
 
     public String formasPagamentoOuNaoInformado() {
         return textoOuPadrao(formasPagamento, "nao informado");
+    }
+
+    public String condicoesParcelamentoOuNaoInformado() {
+        return textoOuPadrao(condicoesParcelamento, "nao informado");
     }
 
     public String entregaOuNaoInformado() {

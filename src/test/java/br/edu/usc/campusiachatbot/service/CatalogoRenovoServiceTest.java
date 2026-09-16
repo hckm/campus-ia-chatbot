@@ -1,6 +1,6 @@
 package br.edu.usc.campusiachatbot.service;
 
-import br.edu.usc.campusiachatbot.entity.CatalogoRenovoEntity;
+import br.edu.usc.campusiachatbot.domain.ProdutoCatalogo;
 import br.edu.usc.campusiachatbot.repository.CatalogoRenovoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,31 +34,31 @@ class CatalogoRenovoServiceTest {
         catalogoRenovoService.salvar(produto(1, "HIDRATANTE", "Creme A", "10.00"));
         catalogoRenovoService.salvar(produto(2, "SORO", "Soro B", "25.00"));
 
-        List<CatalogoRenovoEntity> lista = catalogoRenovoService.listarTodos();
+        List<ProdutoCatalogo> lista = catalogoRenovoService.listarTodos();
 
         assertThat(lista).hasSize(2);
-        assertThat(lista.get(0).getCodigoCatalogo()).isEqualTo(1);
-        assertThat(lista.get(1).getCodigoCatalogo()).isEqualTo(2);
+        assertThat(lista.get(0).codigoCatalogo()).isEqualTo(1);
+        assertThat(lista.get(1).codigoCatalogo()).isEqualTo(2);
     }
 
     @Test
     void deveBuscarPorId() {
-        CatalogoRenovoEntity salvo = catalogoRenovoService.salvar(produto(10, "CAT", "Produto X", "50.00"));
+        ProdutoCatalogo salvo = catalogoRenovoService.salvar(produto(10, "CAT", "Produto X", "50.00"));
 
-        Optional<CatalogoRenovoEntity> encontrado = catalogoRenovoService.buscarPorId(salvo.getId());
+        Optional<ProdutoCatalogo> encontrado = catalogoRenovoService.buscarPorId(salvo.id());
 
         assertThat(encontrado).isPresent();
-        assertThat(encontrado.get().getProduto()).isEqualTo("Produto X");
+        assertThat(encontrado.get().produto()).isEqualTo("Produto X");
     }
 
     @Test
     void deveBuscarPorCodigoCatalogo() {
         catalogoRenovoService.salvar(produto(42, "CAT", "Produto 42", "30.00"));
 
-        Optional<CatalogoRenovoEntity> encontrado = catalogoRenovoService.buscarPorCodigoCatalogo(42);
+        Optional<ProdutoCatalogo> encontrado = catalogoRenovoService.buscarPorCodigoCatalogo(42);
 
         assertThat(encontrado).isPresent();
-        assertThat(encontrado.get().getCodigoCatalogo()).isEqualTo(42);
+        assertThat(encontrado.get().codigoCatalogo()).isEqualTo(42);
     }
 
     @Test
@@ -67,10 +67,11 @@ class CatalogoRenovoServiceTest {
         catalogoRenovoService.salvar(produto(2, "SORO", "Soro B", "25.00"));
         catalogoRenovoService.salvar(produto(3, "HIDRATANTE", "Creme C", "15.00"));
 
-        List<CatalogoRenovoEntity> hidratantes = catalogoRenovoService.listarPorCategoria("HIDRATANTE");
+        List<ProdutoCatalogo> hidratantes = catalogoRenovoService.listarPorCategoria("hidratante");
 
         assertThat(hidratantes).hasSize(2);
-        assertThat(hidratantes).allMatch(p -> p.getCategoria().equals("HIDRATANTE"));
+        assertThat(hidratantes).extracting(ProdutoCatalogo::produto).containsExactly("Creme A", "Creme C");
+        assertThat(hidratantes).allMatch(p -> p.categoria().equals("HIDRATANTE"));
     }
 
     @Test
@@ -78,10 +79,10 @@ class CatalogoRenovoServiceTest {
         catalogoRenovoService.salvar(produto(1, "SORO", "Serum Facial", "80.00"));
         catalogoRenovoService.salvar(produto(2, "CREME", "Creme Hidratante", "40.00"));
 
-        List<CatalogoRenovoEntity> resultado = catalogoRenovoService.pesquisarPorProduto("Serum");
+        List<ProdutoCatalogo> resultado = catalogoRenovoService.pesquisarPorProduto("serum");
 
         assertThat(resultado).hasSize(1);
-        assertThat(resultado.get(0).getProduto()).isEqualTo("Serum Facial");
+        assertThat(resultado.get(0).produto()).isEqualTo("Serum Facial");
     }
 
     @Test
@@ -90,30 +91,59 @@ class CatalogoRenovoServiceTest {
         catalogoRenovoService.salvar(produto(2, "CAT", "Medio", "50.00"));
         catalogoRenovoService.salvar(produto(3, "CAT", "Caro", "200.00"));
 
-        List<CatalogoRenovoEntity> resultado = catalogoRenovoService.listarPorFaixaDePreco(
+        List<ProdutoCatalogo> resultado = catalogoRenovoService.listarPorFaixaDePreco(
                 new BigDecimal("20.00"), new BigDecimal("100.00")
         );
 
         assertThat(resultado).hasSize(1);
-        assertThat(resultado.get(0).getProduto()).isEqualTo("Medio");
+        assertThat(resultado.get(0).produto()).isEqualTo("Medio");
     }
 
     @Test
     void deveExcluirProduto() {
-        CatalogoRenovoEntity salvo = catalogoRenovoService.salvar(produto(99, "CAT", "Temporario", "5.00"));
+        ProdutoCatalogo salvo = catalogoRenovoService.salvar(produto(99, "CAT", "Temporario", "5.00"));
 
-        catalogoRenovoService.excluir(salvo.getId());
+        catalogoRenovoService.excluir(salvo.id());
 
-        assertThat(catalogoRenovoService.buscarPorId(salvo.getId())).isEmpty();
+        assertThat(catalogoRenovoService.buscarPorId(salvo.id())).isEmpty();
     }
 
-    private CatalogoRenovoEntity produto(int codigo, String categoria, String nome, String preco) {
-        CatalogoRenovoEntity p = new CatalogoRenovoEntity();
-        p.setCodigoCatalogo(codigo);
-        p.setCategoria(categoria);
-        p.setProduto(nome);
-        p.setDescricao("Descricao de " + nome);
-        p.setPrecoAtual(new BigDecimal(preco));
-        return p;
+    @Test
+    void deveAtualizarProdutoSemDuplicarCodigoEPreservarValoresNulos() {
+        ProdutoCatalogo salvo = catalogoRenovoService.salvar(produto(7, "CAT", "Produto antigo", "10.10"));
+        ProdutoCatalogo atualizado = new ProdutoCatalogo(
+                salvo.id(),
+                salvo.legacyId(),
+                salvo.codigoCatalogo(),
+                "NOVA",
+                "Produto novo",
+                "Descricao atualizada",
+                new BigDecimal("12.34"),
+                null,
+                null
+        );
+
+        ProdutoCatalogo resultado = catalogoRenovoService.salvar(atualizado);
+
+        assertThat(catalogoRenovoRepository.count()).isEqualTo(1);
+        assertThat(resultado.id()).isEqualTo(salvo.id());
+        assertThat(resultado.codigoCatalogo()).isEqualTo(7);
+        assertThat(resultado.precoAtual()).isEqualByComparingTo("12.34");
+        assertThat(resultado.precoOriginal()).isNull();
+        assertThat(resultado.urlCatalogo()).isNull();
+    }
+
+    private ProdutoCatalogo produto(int codigo, String categoria, String nome, String preco) {
+        return new ProdutoCatalogo(
+                null,
+                null,
+                codigo,
+                categoria,
+                nome,
+                "Descricao de " + nome,
+                new BigDecimal(preco),
+                null,
+                null
+        );
     }
 }
