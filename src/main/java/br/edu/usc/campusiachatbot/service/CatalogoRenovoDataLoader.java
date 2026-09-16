@@ -1,11 +1,12 @@
 package br.edu.usc.campusiachatbot.service;
 
-import br.edu.usc.campusiachatbot.entity.CatalogoRenovoEntity;
-import br.edu.usc.campusiachatbot.repository.CatalogoRenovoRepository;
+import br.edu.usc.campusiachatbot.domain.ProdutoCatalogo;
+import br.edu.usc.campusiachatbot.store.CatalogoStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
@@ -22,11 +23,12 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(prefix = "catalogo", name = "backend", havingValue = "JPA", matchIfMissing = true)
 public class CatalogoRenovoDataLoader implements ApplicationRunner {
 
     private static final String CATALOG_RESOURCE = "classpath:data/catalogo-renovo.csv";
 
-    private final CatalogoRenovoRepository catalogoRenovoRepository;
+    private final CatalogoStore catalogoStore;
     private final ResourceLoader resourceLoader;
 
     @Override
@@ -39,7 +41,7 @@ public class CatalogoRenovoDataLoader implements ApplicationRunner {
         }
 
         CatalogoRenovoImportacaoResult resultado = carregarProdutos(resource);
-        catalogoRenovoRepository.saveAll(resultado.produtos());
+        catalogoStore.salvarTodos(resultado.produtos());
         log.info(
                 "Catalogo Renovo carregado com {} produtos: {} inserts e {} updates",
                 resultado.produtos().size(),
@@ -59,8 +61,8 @@ public class CatalogoRenovoDataLoader implements ApplicationRunner {
                     .map(this::toEntity)
                     .toList();
 
-            List<CatalogoRenovoEntity> produtos = importados.stream()
-                    .map(CatalogoRenovoImportado::entity)
+            List<ProdutoCatalogo> produtos = importados.stream()
+                    .map(CatalogoRenovoImportado::produto)
                     .toList();
             long updates = importados.stream()
                     .filter(CatalogoRenovoImportado::existente)
@@ -80,21 +82,20 @@ public class CatalogoRenovoDataLoader implements ApplicationRunner {
         }
 
         Integer codigoCatalogo = Integer.valueOf(columns.get(0));
-        CatalogoRenovoEntity entity = catalogoRenovoRepository.findByCodigoCatalogo(codigoCatalogo).orElse(null);
-        boolean existente = entity != null;
-        if (!existente) {
-            entity = new CatalogoRenovoEntity();
-        }
+        ProdutoCatalogo existente = catalogoStore.buscarPorCodigoCatalogo(codigoCatalogo).orElse(null);
+        ProdutoCatalogo produto = new ProdutoCatalogo(
+                existente == null ? null : existente.id(),
+                existente == null ? null : existente.legacyId(),
+                codigoCatalogo,
+                columns.get(3),
+                columns.get(1),
+                columns.get(2),
+                new BigDecimal(columns.get(4)),
+                toBigDecimalOrNull(columns.get(5)),
+                toStringOrNull(columns.get(6))
+        );
 
-        entity.setCodigoCatalogo(codigoCatalogo);
-        entity.setProduto(columns.get(1));
-        entity.setDescricao(columns.get(2));
-        entity.setCategoria(columns.get(3));
-        entity.setPrecoAtual(new BigDecimal(columns.get(4)));
-        entity.setPrecoOriginal(toBigDecimalOrNull(columns.get(5)));
-        entity.setUrlCatalogo(toStringOrNull(columns.get(6)));
-
-        return new CatalogoRenovoImportado(entity, existente);
+        return new CatalogoRenovoImportado(produto, existente != null);
     }
 
     private BigDecimal toBigDecimalOrNull(String value) {
@@ -131,9 +132,9 @@ public class CatalogoRenovoDataLoader implements ApplicationRunner {
         return columns;
     }
 
-    private record CatalogoRenovoImportado(CatalogoRenovoEntity entity, boolean existente) {
+    private record CatalogoRenovoImportado(ProdutoCatalogo produto, boolean existente) {
     }
 
-    private record CatalogoRenovoImportacaoResult(List<CatalogoRenovoEntity> produtos, long inserts, long updates) {
+    private record CatalogoRenovoImportacaoResult(List<ProdutoCatalogo> produtos, long inserts, long updates) {
     }
 }

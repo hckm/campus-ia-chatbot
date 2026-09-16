@@ -1,11 +1,9 @@
 package br.edu.usc.campusiachatbot.service;
 
-import br.edu.usc.campusiachatbot.entity.CatalogoRenovoEntity;
-import br.edu.usc.campusiachatbot.repository.CatalogoRenovoRepository;
+import br.edu.usc.campusiachatbot.domain.ProdutoCatalogo;
+import br.edu.usc.campusiachatbot.store.CatalogoStore;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,45 +13,37 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CatalogoRenovoService {
 
-    private final CatalogoRenovoRepository catalogoRenovoRepository;
+    private final CatalogoStore catalogoStore;
 
-    @Transactional
-    public CatalogoRenovoEntity salvar(CatalogoRenovoEntity produtoCatalogo) {
-        return catalogoRenovoRepository.save(produtoCatalogo);
+    public ProdutoCatalogo salvar(ProdutoCatalogo produtoCatalogo) {
+        return catalogoStore.salvar(produtoCatalogo);
     }
 
-    @Transactional(readOnly = true)
-    public List<CatalogoRenovoEntity> listarTodos() {
-        return catalogoRenovoRepository.findAll(Sort.by(Sort.Direction.ASC, "codigoCatalogo"));
+    public List<ProdutoCatalogo> listarTodos() {
+        return catalogoStore.listarTodosOrdenadosPorCodigo();
     }
 
-    @Transactional(readOnly = true)
-    public Optional<CatalogoRenovoEntity> buscarPorId(Long id) {
-        return catalogoRenovoRepository.findById(id);
+    public Optional<ProdutoCatalogo> buscarPorId(String id) {
+        return catalogoStore.buscarPorId(id);
     }
 
-    @Transactional(readOnly = true)
-    public Optional<CatalogoRenovoEntity> buscarPorCodigoCatalogo(Integer codigoCatalogo) {
-        return catalogoRenovoRepository.findByCodigoCatalogo(codigoCatalogo);
+    public Optional<ProdutoCatalogo> buscarPorCodigoCatalogo(Integer codigoCatalogo) {
+        return catalogoStore.buscarPorCodigoCatalogo(codigoCatalogo);
     }
 
-    @Transactional(readOnly = true)
-    public List<CatalogoRenovoEntity> listarPorCategoria(String categoria) {
-        return catalogoRenovoRepository.findByCategoriaIgnoreCaseOrderByProdutoAsc(categoria);
+    public List<ProdutoCatalogo> listarPorCategoria(String categoria) {
+        return catalogoStore.listarPorCategoriaOrdenadaPorProduto(categoria);
     }
 
-    @Transactional(readOnly = true)
-    public List<CatalogoRenovoEntity> pesquisarPorProduto(String produto) {
-        return catalogoRenovoRepository.findByProdutoContainingIgnoreCaseOrderByProdutoAsc(produto);
+    public List<ProdutoCatalogo> pesquisarPorProduto(String produto) {
+        return catalogoStore.pesquisarPorProdutoOrdenadoPorProduto(produto);
     }
 
-    @Transactional(readOnly = true)
-    public List<CatalogoRenovoEntity> listarPorFaixaDePreco(BigDecimal precoMinimo, BigDecimal precoMaximo) {
-        return catalogoRenovoRepository.findByPrecoAtualBetweenOrderByPrecoAtualAsc(precoMinimo, precoMaximo);
+    public List<ProdutoCatalogo> listarPorFaixaDePreco(BigDecimal precoMinimo, BigDecimal precoMaximo) {
+        return catalogoStore.listarPorFaixaDePrecoOrdenadaPorPreco(precoMinimo, precoMaximo);
     }
 
-    @Transactional
-    public void excluir(Long id) {
-        catalogoRenovoRepository.deleteById(id);
+    public void excluir(String id) {
+        catalogoStore.excluir(id);
     }
 }

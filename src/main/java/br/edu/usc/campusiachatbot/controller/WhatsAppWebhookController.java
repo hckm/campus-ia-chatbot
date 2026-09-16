@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +25,12 @@ public class WhatsAppWebhookController {
 
     @PostMapping
     @Operation(summary = "Recebe uma mensagem enviada pelo canal WhatsApp")
-    public ResponseEntity<ChatbotResponseDTO> receberMensagem(@Valid @RequestBody ChatbotRequestDTO request) {
-        return ResponseEntity.ok(chatbotService.processarMensagem(request, OrigemMensagemEnum.WHATSAPP));
+    public ResponseEntity<ChatbotResponseDTO> receberMensagem(
+            @Valid @RequestBody ChatbotRequestDTO request,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey
+    ) {
+        return ResponseEntity.ok(chatbotService.processarMensagem(
+                request, OrigemMensagemEnum.WHATSAPP, idempotencyKey
+        ));
     }
 }

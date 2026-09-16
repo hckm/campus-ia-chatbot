@@ -2,6 +2,12 @@ server:
   port: ${SERVER_PORT:8080}
   shutdown: graceful
 
+catalogo:
+  consulta-ia:
+    limite-itens: ${CATALOGO_CONSULTA_IA_LIMITE_ITENS:8}
+    max-caracteres-contexto: ${CATALOGO_CONSULTA_IA_MAX_CARACTERES_CONTEXTO:6000}
+    max-bytes-contexto: ${CATALOGO_CONSULTA_IA_MAX_BYTES_CONTEXTO:12000}
+
 spring:
   application:
     name: campus-ia-chatbot
@@ -44,12 +50,16 @@ gemini:
   base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
   timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:30}
 
+ia:
+  provider: ${IA_PROVIDER:GEMINI}
+
 estabelecimento:
   nome: ${ESTABELECIMENTO_NOME:}
   tipo: ${ESTABELECIMENTO_TIPO:farmacia de manipulacao}
   horario-funcionamento: ${ESTABELECIMENTO_HORARIO_FUNCIONAMENTO:}
   endereco: ${ESTABELECIMENTO_ENDERECO:}
   formas-pagamento: ${ESTABELECIMENTO_FORMAS_PAGAMENTO:}
+  condicoes-parcelamento: ${ESTABELECIMENTO_CONDICOES_PARCELAMENTO:}
   entrega: ${ESTABELECIMENTO_ENTREGA:Entregamos apenas nas cidades atendidas configuradas.}
   cidades-atendidas: ${ESTABELECIMENTO_CIDADES_ATENDIDAS:}
   uf: ${ESTABELECIMENTO_UF:}

@@ -32,7 +32,7 @@ class ChatbotServiceExceptionTest {
     private AtendimentoRepository atendimentoRepository;
 
     @MockitoBean
-    private GeminiService geminiService;
+    private InterpretacaoIaService interpretacaoIaService;
 
     @MockitoBean
     private CepLookupClient cepLookupClient;
@@ -45,14 +45,14 @@ class ChatbotServiceExceptionTest {
     }
 
     @Test
-    void deveMarcarAtendimentoComoErroQuandoGeminiLancaExcecao() {
+    void deveMarcarAtendimentoComoErroQuandoInterpretacaoIaLancaExcecao() {
         ChatbotRequestDTO request = new ChatbotRequestDTO(
                 "14999999999",
                 "Maria",
                 "ola",
                 OrigemMensagemEnum.WHATSAPP
         );
-        when(geminiService.interpretarMensagem(any(), any(), any()))
+        when(interpretacaoIaService.interpretarMensagem(any(), any(), any()))
                 .thenThrow(new RuntimeException("falha simulada no gemini"));
 
         assertThatThrownBy(() -> chatbotService.processarMensagem(request, OrigemMensagemEnum.SIMULADOR))

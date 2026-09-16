@@ -1,7 +1,7 @@
 package br.edu.usc.campusiachatbot.service;
 
-import br.edu.usc.campusiachatbot.entity.CatalogoRenovoEntity;
-import br.edu.usc.campusiachatbot.repository.CatalogoRenovoRepository;
+import br.edu.usc.campusiachatbot.domain.ProdutoCatalogo;
+import br.edu.usc.campusiachatbot.store.CatalogoStore;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.core.io.Resource;
@@ -9,6 +9,7 @@ import org.springframework.core.io.ResourceLoader;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +17,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -25,9 +25,9 @@ import static org.mockito.Mockito.when;
 
 class CatalogoRenovoDataLoaderTest {
 
-    private final CatalogoRenovoRepository repository = mock(CatalogoRenovoRepository.class);
+    private final CatalogoStore catalogoStore = mock(CatalogoStore.class);
     private final ResourceLoader resourceLoader = mock(ResourceLoader.class);
-    private final CatalogoRenovoDataLoader loader = new CatalogoRenovoDataLoader(repository, resourceLoader);
+    private final CatalogoRenovoDataLoader loader = new CatalogoRenovoDataLoader(catalogoStore, resourceLoader);
 
     @Test
     void deveIgnorarQuandoArquivoNaoExiste() throws Exception {
@@ -37,7 +37,7 @@ class CatalogoRenovoDataLoaderTest {
 
         loader.run(null);
 
-        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(catalogoStore);
     }
 
     @Test
@@ -47,22 +47,23 @@ class CatalogoRenovoDataLoaderTest {
                 + "2,Produto B,Descricao B,CAT_B,20.00,,\n";
 
         mockResource(csv);
-        when(repository.findByCodigoCatalogo(1)).thenReturn(Optional.empty());
-        when(repository.findByCodigoCatalogo(2)).thenReturn(Optional.empty());
-        when(repository.saveAll(anyList())).thenReturn(List.of());
+        when(catalogoStore.buscarPorCodigoCatalogo(1)).thenReturn(Optional.empty());
+        when(catalogoStore.buscarPorCodigoCatalogo(2)).thenReturn(Optional.empty());
 
         loader.run(null);
 
         @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<CatalogoRenovoEntity>> captor = ArgumentCaptor.captor();
-        verify(repository).saveAll(captor.capture());
+        ArgumentCaptor<List<ProdutoCatalogo>> captor = ArgumentCaptor.captor();
+        verify(catalogoStore).salvarTodos(captor.capture());
 
-        List<CatalogoRenovoEntity> salvos = captor.getValue();
+        List<ProdutoCatalogo> salvos = captor.getValue();
         assertThat(salvos).hasSize(2);
-        assertThat(salvos.get(0).getProduto()).isEqualTo("Produto A");
-        assertThat(salvos.get(0).getPrecoOriginal()).isNotNull();
-        assertThat(salvos.get(1).getPrecoOriginal()).isNull();
-        assertThat(salvos.get(1).getUrlCatalogo()).isNull();
+        assertThat(salvos.get(0).produto()).isEqualTo("Produto A");
+        assertThat(salvos.get(0).precoAtual()).isEqualByComparingTo("10.00");
+        assertThat(salvos.get(0).precoOriginal()).isEqualByComparingTo("15.00");
+        assertThat(salvos.get(0).urlCatalogo()).isEqualTo("https://site.com/a");
+        assertThat(salvos.get(1).precoOriginal()).isNull();
+        assertThat(salvos.get(1).urlCatalogo()).isNull();
     }
 
     @Test
@@ -70,22 +71,30 @@ class CatalogoRenovoDataLoaderTest {
         String csv = "codigo,produto,descricao,categoria,precoAtual,precoOriginal,urlCatalogo\n"
                 + "1,Nome Novo,Desc Nova,CAT,12.00,,\n";
 
-        CatalogoRenovoEntity existente = new CatalogoRenovoEntity();
-        existente.setCodigoCatalogo(1);
-        existente.setProduto("Nome Antigo");
+        ProdutoCatalogo existente = new ProdutoCatalogo(
+                "91",
+                null,
+                1,
+                "CAT",
+                "Nome Antigo",
+                "Desc antiga",
+                new BigDecimal("10.00"),
+                null,
+                null
+        );
 
         mockResource(csv);
-        when(repository.findByCodigoCatalogo(1)).thenReturn(Optional.of(existente));
-        when(repository.saveAll(anyList())).thenReturn(List.of());
+        when(catalogoStore.buscarPorCodigoCatalogo(1)).thenReturn(Optional.of(existente));
 
         loader.run(null);
 
         @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<CatalogoRenovoEntity>> captor = ArgumentCaptor.captor();
-        verify(repository).saveAll(captor.capture());
+        ArgumentCaptor<List<ProdutoCatalogo>> captor = ArgumentCaptor.captor();
+        verify(catalogoStore).salvarTodos(captor.capture());
 
-        assertThat(captor.getValue().get(0).getProduto()).isEqualTo("Nome Novo");
-        assertThat(captor.getValue().get(0)).isSameAs(existente);
+        assertThat(captor.getValue().get(0).produto()).isEqualTo("Nome Novo");
+        assertThat(captor.getValue().get(0).id()).isEqualTo("91");
+        assertThat(captor.getValue().get(0).codigoCatalogo()).isEqualTo(1);
     }
 
     @Test
@@ -94,16 +103,15 @@ class CatalogoRenovoDataLoaderTest {
                 + "1,\"Produto, especial\",Descricao,CAT,10.00,,\n";
 
         mockResource(csv);
-        when(repository.findByCodigoCatalogo(1)).thenReturn(Optional.empty());
-        when(repository.saveAll(anyList())).thenReturn(List.of());
+        when(catalogoStore.buscarPorCodigoCatalogo(1)).thenReturn(Optional.empty());
 
         loader.run(null);
 
         @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<CatalogoRenovoEntity>> captor = ArgumentCaptor.captor();
-        verify(repository).saveAll(captor.capture());
+        ArgumentCaptor<List<ProdutoCatalogo>> captor = ArgumentCaptor.captor();
+        verify(catalogoStore).salvarTodos(captor.capture());
 
-        assertThat(captor.getValue().get(0).getProduto()).isEqualTo("Produto, especial");
+        assertThat(captor.getValue().get(0).produto()).isEqualTo("Produto, especial");
     }
 
     @Test
@@ -112,7 +120,7 @@ class CatalogoRenovoDataLoaderTest {
                 + "1,Produto A,apenas tres colunas\n";
 
         mockResource(csv);
-        when(repository.findByCodigoCatalogo(any())).thenReturn(Optional.empty());
+        when(catalogoStore.buscarPorCodigoCatalogo(any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> loader.run(null))
                 .isInstanceOf(IllegalStateException.class)
@@ -127,14 +135,13 @@ class CatalogoRenovoDataLoaderTest {
                 + "\n";
 
         mockResource(csv);
-        when(repository.findByCodigoCatalogo(1)).thenReturn(Optional.empty());
-        when(repository.saveAll(anyList())).thenReturn(List.of());
+        when(catalogoStore.buscarPorCodigoCatalogo(1)).thenReturn(Optional.empty());
 
         loader.run(null);
 
         @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<CatalogoRenovoEntity>> captor = ArgumentCaptor.captor();
-        verify(repository).saveAll(captor.capture());
+        ArgumentCaptor<List<ProdutoCatalogo>> captor = ArgumentCaptor.captor();
+        verify(catalogoStore).salvarTodos(captor.capture());
         assertThat(captor.getValue()).hasSize(1);
     }
 

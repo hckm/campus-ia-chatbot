@@ -25,7 +25,7 @@ public class EnderecoEnrichmentService {
     );
 
     private final CepLookupClient cepLookupClient;
-    private final EstabelecimentoProperties estabelecimentoProperties;
+    private final EstabelecimentoComercialProvider estabelecimentoComercialProvider;
 
     public EnderecoEnriquecidoDTO enriquecer(String mensagem) {
         String cep = extrairCep(mensagem);
@@ -37,12 +37,12 @@ public class EnderecoEnrichmentService {
 
         String cidade = cidadeAtendidaMencionada(mensagem);
         String logradouro = extrairLogradouro(mensagem);
-        if (cidade == null || logradouro == null || !estabelecimentoProperties.hasUf()) {
+        if (cidade == null || logradouro == null || !estabelecimento().hasUf()) {
             return EnderecoEnriquecidoDTO.vazio();
         }
 
         List<CepLookupResponseDTO> ceps = cepLookupClient.buscarPorEndereco(
-                estabelecimentoProperties.uf().trim(),
+                estabelecimento().uf().trim(),
                 cidade,
                 logradouro
         );
@@ -117,11 +117,11 @@ public class EnderecoEnrichmentService {
     }
 
     private List<String> cidadesAtendidas() {
-        if (estabelecimentoProperties.cidadesAtendidas() == null) {
+        if (estabelecimento().cidadesAtendidas() == null) {
             return List.of();
         }
 
-        return estabelecimentoProperties.cidadesAtendidas().stream()
+        return estabelecimento().cidadesAtendidas().stream()
                 .filter(cidade -> cidade != null && !cidade.isBlank())
                 .map(String::trim)
                 .toList();
@@ -134,5 +134,9 @@ public class EnderecoEnrichmentService {
         String semAcento = Normalizer.normalize(valor, Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "");
         return semAcento.toLowerCase(Locale.ROOT);
+    }
+
+    private EstabelecimentoProperties estabelecimento() {
+        return estabelecimentoComercialProvider.obter();
     }
 }
