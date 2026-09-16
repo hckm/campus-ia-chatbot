@@ -2,6 +2,17 @@ server:
   port: ${SERVER_PORT:8080}
   shutdown: graceful
 
+azure:
+  openai:
+    endpoint: ${AZURE_OPENAI_ENDPOINT:}
+    deployment: ${AZURE_OPENAI_DEPLOYMENT:}
+    authentication: ${AZURE_OPENAI_AUTHENTICATION:MANAGED_IDENTITY}
+    api-key: ${AZURE_OPENAI_API_KEY:}
+    managed-identity-client-id: ${AZURE_OPENAI_MANAGED_IDENTITY_CLIENT_ID:}
+    timeout: ${AZURE_OPENAI_TIMEOUT:30s}
+    max-output-tokens: ${AZURE_OPENAI_MAX_OUTPUT_TOKENS:800}
+    max-response-bytes: ${AZURE_OPENAI_MAX_RESPONSE_BYTES:65536}
+
 catalogo:
   consulta-ia:
     limite-itens: ${CATALOGO_CONSULTA_IA_LIMITE_ITENS:8}
