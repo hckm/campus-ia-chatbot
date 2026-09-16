@@ -3,6 +3,24 @@ server:
   shutdown: graceful
 
 azure:
+  cosmos:
+    enabled: ${AZURE_COSMOS_ENABLED:false}
+    endpoint: ${AZURE_COSMOS_ENDPOINT:}
+    database: ${AZURE_COSMOS_DATABASE:campus-ia-chatbot}
+    conversas-container: ${AZURE_COSMOS_CONVERSAS_CONTAINER:conversas}
+    catalogo-container: ${AZURE_COSMOS_CATALOGO_CONTAINER:catalogo}
+    estabelecimentos-container: ${AZURE_COSMOS_ESTABELECIMENTOS_CONTAINER:estabelecimentos}
+    catalogo-id: ${AZURE_COSMOS_CATALOGO_ID:renovo}
+    estabelecimento-id: ${AZURE_COSMOS_ESTABELECIMENTO_ID:renovo}
+    catalogo-batch-max-operations: ${AZURE_COSMOS_CATALOGO_BATCH_MAX_OPERATIONS:100}
+    catalogo-batch-max-bytes: ${AZURE_COSMOS_CATALOGO_BATCH_MAX_BYTES:1900000}
+    provisioning:
+      enabled: ${AZURE_COSMOS_PROVISIONING_ENABLED:false}
+    seed:
+      enabled: ${AZURE_COSMOS_SEED_ENABLED:false}
+    autenticacao: ${AZURE_COSMOS_AUTENTICACAO:MANAGED_IDENTITY}
+    managed-identity-client-id: ${AZURE_COSMOS_MANAGED_IDENTITY_CLIENT_ID:}
+    emulator-key: ${AZURE_COSMOS_EMULATOR_KEY:}
   openai:
     endpoint: ${AZURE_OPENAI_ENDPOINT:}
     deployment: ${AZURE_OPENAI_DEPLOYMENT:}
@@ -14,10 +32,14 @@ azure:
     max-response-bytes: ${AZURE_OPENAI_MAX_RESPONSE_BYTES:65536}
 
 catalogo:
+  backend: ${CATALOGO_BACKEND:JPA}
   consulta-ia:
     limite-itens: ${CATALOGO_CONSULTA_IA_LIMITE_ITENS:8}
     max-caracteres-contexto: ${CATALOGO_CONSULTA_IA_MAX_CARACTERES_CONTEXTO:6000}
     max-bytes-contexto: ${CATALOGO_CONSULTA_IA_MAX_BYTES_CONTEXTO:12000}
+
+persistencia:
+  backend: ${PERSISTENCIA_BACKEND:JPA}
 
 spring:
   application:
@@ -104,6 +126,7 @@ chatbot:
   sessao:
     janela-inatividade-minutos: ${CHATBOT_SESSAO_JANELA_INATIVIDADE_MINUTOS:30}
     max-historico-mensagens: ${CHATBOT_SESSAO_MAX_HISTORICO_MENSAGENS:10}
+    processamento-expiracao-segundos: ${CHATBOT_SESSAO_PROCESSAMENTO_EXPIRACAO_SEGUNDOS:60}
 
 springdoc:
   swagger-ui:
