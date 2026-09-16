@@ -64,6 +64,12 @@ gemini:
 ia:
   provider: ${IA_PROVIDER:GEMINI}
 
+codex-cli:
+  executable: ${CODEX_CLI_EXECUTABLE:codex}
+  model: ${CODEX_CLI_MODEL:}
+  timeout: ${CODEX_CLI_TIMEOUT:45s}
+  max-output-bytes: ${CODEX_CLI_MAX_OUTPUT_BYTES:65536}
+
 estabelecimento:
   nome: ${ESTABELECIMENTO_NOME:}
   tipo: ${ESTABELECIMENTO_TIPO:farmacia de manipulacao}
